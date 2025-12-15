@@ -1,0 +1,184 @@
+<!-- templates/apps/home.html -->
+{% extends 'apps/base/base.html' %}
+{% load static %}
+
+{% block title %}Bosh sahifa - Arzon va sifatli mahsulotlar | Premium Store{% endblock %}
+
+{% block meta_description %}
+    <meta name="description"
+          content="Eng yaxshi mahsulotlarni qulay narxlarda xarid qiling. Elektronika, kiyim, sport buyumlari va kitoblar. Tezkor yetkazib berish va kafolat.">
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center position-relative">
+                    <h1>Premium<br>Collection</h1>
+                    <p>Zamonaviy dizayn. Yuqori sifat. Qulay narx.</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
+                        <a href="{% url 'apps:product_list' %}" class="btn btn-light btn-lg">
+                            🛍️ Xarid qilish
+                        </a>
+                        <a href="#categories" class="btn btn-outline-light btn-lg">
+                            📂 Kategoriyalar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number">{{ categories.count }}+</div>
+                    <div class="stat-label">Kategoriya</div>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number">{{ featured_products.count }}+</div>
+                    <div class="stat-label">Mahsulot</div>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Onlayn</div>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Kafolat</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="container my-5 py-5" id="categories">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Kategoriyalar</h2>
+            <p style="color: rgba(255,255,255,0.5); font-size: 1.1em; margin-top: 30px;">
+                Qiziqtirgan kategoriyani tanlang
+            </p>
+        </div>
+
+        {% if categories %}
+            <div class="row g-4">
+                {% for category in categories %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{% url 'apps:product_list' %}?category={{ category.slug }}" class="category-card">
+                            <div class="category-card-image">
+                                {% if category.icon %}
+                                    <img src="{{ category.icon.url }}" alt="{{ category.name }}" class="category-icon">
+                                {% else %}
+                                    <div class="category-icon-placeholder">📦</div>
+                                {% endif %}
+                            </div>
+                            <div class="category-card-body">
+                                <h3>{{ category.name }}</h3>
+                                <p class="category-count">{{ category.products.count }} mahsulot</p>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 5em; margin-bottom: 20px;">📦</div>
+                <h3>Kategoriyalar hali qo'shilmagan</h3>
+                <p style="color: rgba(255,255,255,0.5); margin-top: 15px;">Admin paneldan kategoriya qo'shing</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Featured Products Section -->
+    {% if featured_products %}
+        <section class="container my-5 py-5">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Ommabop mahsulotlar</h2>
+                <p style="color: rgba(255,255,255,0.5); font-size: 1.1em; margin-top: 30px;">
+                    Eng ko'p sotilgan va mashhur mahsulotlar
+                </p>
+            </div>
+
+            <div class="row g-4">
+                {% for product in featured_products %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="product-card">
+                            <a href="{% url 'apps:product_detail' product.slug %}">
+                                <img src="{{ product.image.url }}"
+                                     alt="{{ product.name }}"
+                                     class="product-image"
+                                     loading="lazy">
+                            </a>
+                            <div class="product-body">
+                                <a href="{% url 'apps:product_detail' product.slug %}" style="text-decoration: none;">
+                                    <h5 class="product-name">{{ product.name }}</h5>
+                                </a>
+                                <p class="product-price">{{ product.price|floatformat:0 }} so'm</p>
+                                <div class="product-description">
+                                    {{ product.description|striptags|truncatewords:8 }}
+                                </div>
+                                <a href="{% url 'apps:product_detail' product.slug %}" class="buy-btn">
+                                    Ko'rish
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-5">
+                <a href="{% url 'apps:product_list' %}" class="btn btn-outline-light btn-lg">
+                    Barcha mahsulotlar →
+                </a>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Features Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-md-4">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🚚</div>
+                    <h5 style="color: #fff; margin-bottom: 15px; font-weight: 700; font-size: 1.3em;">Tezkor yetkazib
+                        berish</h5>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 1em;">Buyurtmangizni tez va xavfsiz yetkazib
+                        beramiz</p>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size: 4em; margin-bottom: 20px;">✅</div>
+                    <h5 style="color: #fff; margin-bottom: 15px; font-weight: 700; font-size: 1.3em;">Kafolatlangan
+                        sifat</h5>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 1em;">Barcha mahsulotlar sifat tekshiruvidan
+                        o'tgan</p>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size: 4em; margin-bottom: 20px;">💳</div>
+                    <h5 style="color: #fff; margin-bottom: 15px; font-weight: 700; font-size: 1.3em;">Xavfsiz
+                        to'lov</h5>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 1em;">Barcha to'lov usullari xavfsiz va
+                        himoyalangan</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="container my-5 py-5">
+        <div class="text-center"
+             style="background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); padding: 80px 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="color: #fff; font-size: 2.5em; font-weight: 700; margin-bottom: 20px; letter-spacing: -1px;">
+                Yangi mahsulotlardan xabardor bo'ling
+            </h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 1.2em; margin-bottom: 30px;">
+                Telegram kanalimizga qo'shiling va chegirmalardan birinchi bo'lib foydalaning
+            </p>
+            <a href="#" class="btn btn-light btn-lg">
+                📱 Telegram'da obuna bo'lish
+            </a>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,241 @@
+<!-- templates/apps/product-detail.html -->
+{% extends 'apps/base/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.meta_title|default:product.name }} - Premium Store{% endblock %}
+
+{% block meta_description %}
+    <meta name="description" content="{{ product.meta_description }}">
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .product-detail-image {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .price-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .buy-now-btn {
+            background: #fff;
+            color: #0a0a0a;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 25px rgba(255, 255, 255, 0.25);
+        }
+
+        .buy-now-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.35);
+            color: #0a0a0a;
+        }
+
+        .product-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95em;
+        }
+
+        .description-content {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+        }
+
+        .description-content p,
+        .description-content ul,
+        .description-content ol {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.9;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
+        .description-content ul,
+        .description-content ol {
+            padding-left: 25px;
+        }
+
+        .description-content li {
+            margin-bottom: 10px;
+        }
+
+        .description-content h1,
+        .description-content h2,
+        .description-content h3 {
+            color: #fff;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'apps:home' %}">Bosh sahifa</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'apps:product_list' %}">Mahsulotlar</a></li>
+                <li class="breadcrumb-item"><a
+                        href="{% url 'apps:product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a>
+                </li>
+                <li class="breadcrumb-item active">{{ product.name }}</li>
+            </ol>
+        </nav>
+
+        <!-- Schema.org for SEO -->
+        <script type="application/ld+json">
+            {
+              "@context": "https://schema.org/",
+              "@type": "Product",
+              "name": "{{ product.name }}",
+      "image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}",
+      "description": "{{ product.description|striptags }}",
+      "brand": {
+        "@type": "Brand",
+        "name": "{{ product.category.name }}"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "{{ request.build_absolute_uri }}",
+        "priceCurrency": "UZS",
+        "price": "{{ product.price }}",
+        "availability": "https://schema.org/InStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "Premium Store"
+        }
+      }
+    }
+        </script>
+
+        <div class="row">
+            <!-- Product Image -->
+            <div class="col-lg-6 mb-4">
+                <img src="{{ product.image.url }}"
+                     alt="{{ product.name }}"
+                     class="product-detail-image">
+            </div>
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <!-- Category Badge -->
+                <a href="{% url 'apps:product_list' %}?category={{ product.category.slug }}"
+                   class="badge bg-secondary text-decoration-none mb-3"
+                   style="font-size: 1em; padding: 10px 20px;">
+                    {{ product.category.name }}
+                </a>
+
+                <!-- Product Name -->
+                <h1 style="font-size: 2.5em; font-weight: 700; color: #fff; margin-bottom: 25px; letter-spacing: -1px;">
+                    {{ product.name }}
+                </h1>
+
+                <!-- Meta Info -->
+                <div class="product-meta">
+                    <div class="meta-item">
+                        <span style="color: rgba(255,255,255,0.6);">Ko'rishlar:</span>
+                        <span style="color: #fff; font-weight: 700; margin-left: 8px;">{{ product.views }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span style="color: rgba(255,255,255,0.6);">Kliklar:</span>
+                        <span style="color: #fff; font-weight: 700; margin-left: 8px;">{{ product.clicks }}</span>
+                    </div>
+                </div>
+
+                <!-- Price -->
+                <div class="price-tag">
+                    <div style="color: rgba(255,255,255,0.6); margin-bottom: 10px; font-size: 0.95em;">Narxi:</div>
+                    <h2 style="color: #fff; margin: 0; font-size: 3em; font-weight: 700; letter-spacing: -2px;">
+                        {{ product.price|floatformat:0 }}
+                        <small style="font-size: 0.5em; font-weight: 500;">so'm</small>
+                    </h2>
+                </div>
+
+                <!-- Buy Button -->
+                <a href="{% url 'apps:track_click' product.id %}"
+                   class="buy-now-btn"
+                   target="_blank"
+                   rel="nofollow sponsored noopener">
+                    🛒 Xarid qilish
+                </a>
+
+                <!-- Info Alert -->
+                <div style="background: rgba(13, 202, 240, 0.1); border: 1px solid rgba(13, 202, 240, 0.3); border-radius: 12px; padding: 20px; margin-top: 30px;">
+                    <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 0.95em;">
+                        ℹ️ Tugmani bossangiz, mahsulot sotuvchisining do'koniga o'tasiz.
+                        Xarid xavfsiz va ishonchli.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Description -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 style="color: #fff; font-size: 2em; font-weight: 700; margin-bottom: 30px;">
+                    Mahsulot haqida
+                </h3>
+                <div class="description-content">
+                    {{ product.description|safe }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        {% if related_products %}
+            <div class="row mt-5 pt-5">
+                <div class="col-12 mb-5">
+                    <h3 style="color: #fff; font-size: 2em; font-weight: 700; text-align: center;">
+                        O'xshash mahsulotlar
+                    </h3>
+                </div>
+                {% for item in related_products %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="product-card">
+                            <a href="{% url 'apps:product_detail' item.slug %}">
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="product-image">
+                            </a>
+                            <div class="product-body">
+                                <a href="{% url 'apps:product_detail' item.slug %}" style="text-decoration: none;">
+                                    <h5 class="product-name">{{ item.name }}</h5>
+                                </a>
+                                <p class="product-price">{{ item.price|floatformat:0 }} so'm</p>
+                                <a href="{% url 'apps:product_detail' item.slug %}" class="buy-btn">
+                                    Ko'rish
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

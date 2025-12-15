@@ -1,0 +1,184 @@
+<!-- templates/apps/product-list.html -->
+{% extends 'apps/base/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if active_category != 'all' %}
+        {% for cat in categories %}
+            {% if cat.slug == active_category %}
+                {{ cat.name }} - Mahsulotlar | Premium Store
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        Barcha mahsulotlar | Premium Store
+    {% endif %}
+{% endblock %}
+
+{% block meta_description %}
+    {% if active_category != 'all' %}
+        <meta name="description" content="
+                {% for cat in categories %}{% if cat.slug == active_category %}{{ cat.name }}{% endif %}{% endfor %} kategoriyasidagi eng yaxshi mahsulotlar. Arzon narxlarda sifatli mahsulotlar.">
+    {% else %}
+        <meta name="description"
+              content="Barcha kategoriyalardagi mahsulotlar. Elektronika, kiyim, sport va ko'p narsalar.">
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="section-title">
+                {% if active_category != 'all' %}
+                    {% for cat in categories %}
+                        {% if cat.slug == active_category %}
+                            {{ cat.name }}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    Barcha mahsulotlar
+                {% endif %}
+            </h1>
+            <p style="color: rgba(255,255,255,0.5); font-size: 1.1em; margin-top: 30px;">
+                Jami <span style="color: #fff; font-weight: 700;">{{ page_obj.paginator.count }}</span> ta mahsulot
+                topildi
+            </p>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="category-filter">
+            <a href="{% url 'apps:product_list' %}?category=all"
+               class="category-filter-btn {% if active_category == 'all' %}active{% endif %}">
+                🔥 Barchasi
+            </a>
+            {% for category in categories %}
+                <a href="{% url 'apps:product_list' %}?category={{ category.slug }}"
+                   class="category-filter-btn {% if active_category == category.slug %}active{% endif %}">
+                    {{ category.name }}
+                    <span style="opacity: 0.6; font-size: 0.9em; margin-left: 5px;">({{ category.product_count }})</span>
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- Products Grid -->
+        {% if products %}
+            <div class="row g-4">
+                {% for product in products %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="product-card">
+                            <a href="{% url 'apps:product_detail' product.slug %}">
+                                <img src="{{ product.image.url }}"
+                                     alt="{{ product.name }}"
+                                     class="product-image"
+                                     loading="lazy">
+                            </a>
+                            <div class="product-body">
+                                <!-- Category Badge -->
+                                <a href="{% url 'apps:product_list' %}?category={{ product.category.slug }}"
+                                   class="badge bg-secondary text-decoration-none mb-2"
+                                   style="font-size: 0.75em;">
+                                    {{ product.category.name }}
+                                </a>
+
+                                <!-- Product Name -->
+                                <a href="{% url 'apps:product_detail' product.slug %}" style="text-decoration: none;">
+                                    <h5 class="product-name">{{ product.name }}</h5>
+                                </a>
+
+                                <!-- Price -->
+                                <p class="product-price">{{ product.price|floatformat:0 }} so'm</p>
+
+                                <!-- Description -->
+                                <div class="product-description">
+                                    {{ product.description|striptags|truncatewords:12 }}
+                                </div>
+
+                                <!-- Stats -->
+                                <div class="d-flex justify-content-between mb-3"
+                                     style="color: rgba(255,255,255,0.5); font-size: 0.85em;">
+                                    <span>👁️ {{ product.views }}</span>
+                                    <span>🔗 {{ product.clicks }}</span>
+                                </div>
+
+                                <!-- Button -->
+                                <a href="{% url 'apps:product_detail' product.slug %}" class="buy-btn">
+                                    Batafsil
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?category={{ active_category }}&page=1">
+                                    ⏮️ Birinchi
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?category={{ active_category }}&page={{ page_obj.previous_page_number }}">
+                                    ← Orqaga
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- Page Numbers -->
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?category={{ active_category }}&page={{ num }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?category={{ active_category }}&page={{ page_obj.next_page_number }}">
+                                    Keyingi →
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?category={{ active_category }}&page={{ page_obj.paginator.num_pages }}">
+                                    Oxirgi ⏭️
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+                <!-- Page Info -->
+                <div class="text-center mt-3">
+                    <small style="color: rgba(255,255,255,0.5);">
+                        Sahifa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                        (Jami {{ page_obj.paginator.count }} ta mahsulot)
+                    </small>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div style="font-size: 5em; margin-bottom: 20px;">📦</div>
+                <h3>Bu kategoriyada mahsulotlar yo'q</h3>
+                <p style="color: rgba(255,255,255,0.5); margin: 20px 0;">Boshqa kategoriyalarni ko'rib chiqing</p>
+                <a href="{% url 'apps:product_list' %}?category=all" class="btn btn-outline-light btn-lg mt-3">
+                    Barcha mahsulotlar
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

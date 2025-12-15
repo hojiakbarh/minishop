@@ -1,0 +1,316 @@
+<!-- templates/apps/search.html -->
+{% extends 'apps/base/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if query %}
+        "{{ query }}" - Qidiruv natijalari | Premium Store
+    {% else %}
+        Qidiruv | Premium Store
+    {% endif %}
+{% endblock %}
+
+{% block meta_description %}
+    {% if query %}
+        <meta name="description"
+              content="{{ query }} bo'yicha qidiruv natijalari. {{ total_results }} ta mahsulot topildi.">
+    {% else %}
+        <meta name="description" content="Mahsulotlarni qidirish. Nomi yoki tavsifi bo'yicha izlang.">
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .search-hero {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 80px 0;
+            margin-bottom: 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 20px 70px 20px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-box button {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            padding: 12px 30px;
+            background: #fff;
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .popular-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .popular-tag {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .popular-tag:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .search-results-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Search Hero -->
+    <div class="search-hero">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h1 style="font-size: 3em; font-weight: 700; color: #fff; margin-bottom: 20px; letter-spacing: -2px;">
+                    {% if query %}
+                        Qidiruv natijalari
+                    {% else %}
+                        Mahsulotlarni qidiring
+                    {% endif %}
+                </h1>
+
+                {% if query %}
+                    <p style="color: rgba(255,255,255,0.6); font-size: 1.2em;">
+                        "<strong style="color: #fff;">{{ query }}</strong>" bo'yicha
+                        <span style="color: #fff; font-weight: 700;">{{ total_results }}</span> ta natija topildi
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-box">
+                <form method="GET" action="{% url 'apps:search' %}">
+                    <input type="search"
+                           name="q"
+                           placeholder="Mahsulot nomi yoki tavsifini kiriting..."
+                           value="{{ query|default:'' }}"
+                           required>
+                    <button type="submit">🔍 Qidirish</button>
+                </form>
+            </div>
+
+            <!-- Popular Searches -->
+            {% if not query %}
+                <div class="popular-tags">
+                    <small style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; margin-bottom: 10px;">
+                        Mashhur qidiruvlar:
+                    </small>
+                    <a href="{% url 'apps:search' %}?q=smartfon" class="popular-tag">📱 smartfon</a>
+                    <a href="{% url 'apps:search' %}?q=noutbuk" class="popular-tag">💻 noutbuk</a>
+                    <a href="{% url 'apps:search' %}?q=kiyim" class="popular-tag">👕 kiyim</a>
+                    <a href="{% url 'apps:search' %}?q=kitob" class="popular-tag">📚 kitob</a>
+                    <a href="{% url 'apps:search' %}?q=sport" class="popular-tag">⚽ sport</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <!-- Search Results -->
+        {% if query %}
+            {% if products %}
+                <!-- Results Info -->
+                <div class="search-results-info">
+                    <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 1.05em;">
+                        "<strong style="color: #fff;">{{ query }}</strong>" uchun
+                        <strong style="color: #fff;">{{ total_results }}</strong> ta mahsulot topildi
+                    </p>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row g-4">
+                    {% for product in products %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="product-card">
+                                <a href="{% url 'apps:product_detail' product.slug %}">
+                                    <img src="{{ product.image.url }}"
+                                         alt="{{ product.name }}"
+                                         class="product-image"
+                                         loading="lazy">
+                                </a>
+                                <div class="product-body">
+                                    <!-- Category Badge -->
+                                    <a href="{% url 'apps:product_list' %}?category={{ product.category.slug }}"
+                                       class="badge bg-secondary text-decoration-none mb-2"
+                                       style="font-size: 0.75em;">
+                                        {{ product.category.name }}
+                                    </a>
+
+                                    <!-- Product Name -->
+                                    <a href="{% url 'apps:product_detail' product.slug %}"
+                                       style="text-decoration: none;">
+                                        <h5 class="product-name">{{ product.name }}</h5>
+                                    </a>
+
+                                    <!-- Price -->
+                                    <p class="product-price">{{ product.price|floatformat:0 }} so'm</p>
+
+                                    <!-- Description -->
+                                    <div class="product-description">
+                                        {{ product.description|striptags|truncatewords:12 }}
+                                    </div>
+
+                                    <!-- Stats -->
+                                    <div class="d-flex justify-content-between mb-3"
+                                         style="color: rgba(255,255,255,0.5); font-size: 0.85em;">
+                                        <span>👁️ {{ product.views }}</span>
+                                        <span>🔗 {{ product.clicks }}</span>
+                                    </div>
+
+                                    <!-- Button -->
+                                    <a href="{% url 'apps:product_detail' product.slug %}" class="buy-btn">
+                                        Batafsil
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">
+                                        ← Orqaga
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                    <span class="page-link">
+                        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                    </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">
+                                        Keyingi →
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                <!-- No Results -->
+                <div class="empty-state">
+                    <div style="font-size: 5em; margin-bottom: 20px;">🔍</div>
+                    <h3>Hech narsa topilmadi</h3>
+                    <p style="color: rgba(255,255,255,0.5); margin: 20px 0; font-size: 1.1em;">
+                        "<strong style="color: #fff;">{{ query }}</strong>" bo'yicha natija yo'q.
+                    </p>
+                    <p style="color: rgba(255,255,255,0.5); margin-bottom: 30px;">
+                        Boshqa so'z bilan qidiring yoki barcha mahsulotlarni ko'ring.
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{% url 'apps:product_list' %}" class="btn btn-outline-light btn-lg">
+                            📦 Barcha mahsulotlar
+                        </a>
+                        <a href="{% url 'apps:search' %}" class="btn btn-light btn-lg">
+                            🔄 Qayta qidirish
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Initial State (no search yet) -->
+            <div class="empty-state">
+                <div style="font-size: 5em; margin-bottom: 20px;">🎯</div>
+                <h3>Qidiruvni boshlang</h3>
+                <p style="color: rgba(255,255,255,0.5); font-size: 1.1em; margin: 20px 0;">
+                    Mahsulot nomini yoki tavsifini yuqoridagi qatorga kiriting
+                </p>
+            </div>
+
+            <!-- Categories Shortcut -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h5 style="color: #fff; text-align: center; margin-bottom: 30px; font-size: 1.5em;">
+                        Yoki kategoriya bo'yicha ko'ring:
+                    </h5>
+                    <div class="category-filter">
+                        {% for category in all_categories %}
+                            <a href="{% url 'apps:product_list' %}?category={{ category.slug }}"
+                               class="category-filter-btn">
+                                {{ category.name }}
+                                <span style="opacity: 0.6; font-size: 0.9em; margin-left: 5px;">({{ category.products.count }})</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Products -->
+            {% if all_categories %}
+                <div class="row mt-5 pt-5">
+                    <div class="col-12 text-center mb-5">
+                        <h3 style="color: #fff; font-size: 2em; font-weight: 700;">
+                            Mashhur mahsulotlar
+                        </h3>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}
