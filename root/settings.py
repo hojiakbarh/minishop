@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-3$qu$cqr-q792+vx2vh)p-hn!4q4u73u)j9hpp004s%#nt=5hi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["https://minishop-zbh8.onrender.com", 'minishop.com']
-
+ALLOWED_HOSTS = ['minishop-zbh8.onrender.com']
 
 # Application definition
 
